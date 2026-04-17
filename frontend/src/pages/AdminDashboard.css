@@ -523,8 +523,22 @@
 .password-popup-content .modal-header h3 {
   margin: 0;
   font-size: 1.15rem;
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 700;
+}
+
+.password-popup-content .admin-form label {
+  color: #e2e8f0;
+}
+
+.password-popup-content .admin-form input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.password-popup-content .admin-form input:focus {
+  border-color: var(--accent-color);
 }
 
 .password-popup-content .admin-form {
