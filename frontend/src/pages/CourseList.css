@@ -118,7 +118,7 @@
 }
 
 .portfolio-btn:hover {
-  background: #5a43d1;
+  background: var(--accent-hover);
 }
 
 .no-results {

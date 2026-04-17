@@ -247,7 +247,7 @@ const ManageContent = () => {
                 <div className="manage-grid">
                     {/* Left: Module Management */}
                     <div className="modules-management glass-panel">
-                        <div className="section-header">
+                        <div className="section-header navy-bar">
                             <h3>Modules</h3>
                         </div>
                         
@@ -312,7 +312,9 @@ const ManageContent = () => {
 
                     {/* Right: Upload Section */}
                     <div className="upload-session-section glass-panel">
-                        <h3>{activeModuleId ? 'Add Session to ' + (modules.find(m => m._id === activeModuleId)?.title) : 'Select a Module to add sessions'}</h3>
+                        <div className="section-header navy-bar">
+                            <h3>{activeModuleId ? 'Add Session to ' + (modules.find(m => m._id === activeModuleId)?.title) : 'Select a Module to add sessions'}</h3>
+                        </div>
                         
                         {activeModuleId && (
                             <form onSubmit={handleUploadVideo} className="admin-form">

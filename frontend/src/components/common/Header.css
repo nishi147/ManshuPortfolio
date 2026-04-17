@@ -90,6 +90,12 @@
   border-radius: 99px;
   font-weight: 600;
   font-size: 0.9rem;
+  border: none; /* Remove any border from generic btn classes */
+}
+
+.desktop-actions .logout-btn:hover {
+  background: var(--accent-hover) !important;
+  color: white !important;
 }
 
 @media (min-width: 992px) {

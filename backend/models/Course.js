@@ -21,7 +21,7 @@ const courseSchema = mongoose.Schema(
     demoVideo: {
       type: String,
     },
-
+    
     isPublic: {
       type: Boolean,
       default: true,

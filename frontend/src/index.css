@@ -157,7 +157,7 @@ button {
 :root {
   --portfolio-bg: #f3f4f8;
   --portfolio-sidebar: #1f1f2e;
-  --portfolio-accent: #7b5cff;
+  --portfolio-accent: var(--accent-color);
   --portfolio-text-dark: #1a1a2e;
 }
 
@@ -224,6 +224,6 @@ button {
 }
 
 .portfolio-btn:hover {
-  background: #5a43d1;
+  background: var(--accent-hover);
 }
 
