@@ -29,8 +29,8 @@ const CoursePlayer = () => {
     const fetchData = async () => {
         try {
             const [curriculumRes, progressRes] = await Promise.all([
-                fetch(`/api/courses/${courseId}/curriculum`),
-                fetch(`/api/progress/${courseId}`, {
+                fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${courseId}/curriculum`),
+                fetch(`https://manshu-portfolio-frhd.vercel.app/api/progress/${courseId}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 })
             ]);
@@ -56,7 +56,7 @@ const CoursePlayer = () => {
 
     const toggleComplete = async (lessonId) => {
         try {
-            const res = await fetch('/api/progress/toggle', {
+            const res = await fetch('https://manshu-portfolio-frhd.vercel.app/api/progress/toggle', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -10,7 +10,7 @@ const LandingPage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('/api/courses');
+        const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses');
         const data = await response.json();
         // Just take public ones
         const publicCourses = data.filter(c => c.isPublic).slice(0, 3);

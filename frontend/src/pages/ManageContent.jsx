@@ -53,8 +53,8 @@ const ManageContent = () => {
     const fetchCourseData = async () => {
         try {
             const [courseRes, curriculumRes] = await Promise.all([
-                fetch(`/api/courses/${id}`),
-                fetch(`/api/courses/${id}/curriculum`)
+                fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${id}`),
+                fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${id}/curriculum`)
             ]);
             const courseData = await courseRes.json();
             const curriculumData = await curriculumRes.json();
@@ -81,7 +81,7 @@ const ManageContent = () => {
     const handleAddModule = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch('/api/modules', {
+            const res = await fetch('https://manshu-portfolio-frhd.vercel.app/api/modules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ const ManageContent = () => {
 
     const confirmDeleteModule = async (modId) => {
         try {
-            const res = await fetch(`/api/modules/${modId}`, {
+            const res = await fetch(`https://manshu-portfolio-frhd.vercel.app/api/modules/${modId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${user.token}` }
             });
@@ -219,7 +219,7 @@ const ManageContent = () => {
 
     const confirmDeleteVideo = async (videoId) => {
         try {
-            const res = await fetch(`/api/videos/${videoId}`, {
+            const res = await fetch(`https://manshu-portfolio-frhd.vercel.app/api/videos/${videoId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${user.token}` }
             });

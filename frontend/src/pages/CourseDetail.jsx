@@ -13,8 +13,8 @@ const CourseDetail = () => {
     const fetchData = async () => {
       try {
         const [courseRes, curriculumRes] = await Promise.all([
-          fetch(`/api/courses/${id}`),
-          fetch(`/api/courses/${id}/curriculum`)
+          fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${id}`),
+          fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${id}/curriculum`)
         ]);
         
         const courseData = await courseRes.json();

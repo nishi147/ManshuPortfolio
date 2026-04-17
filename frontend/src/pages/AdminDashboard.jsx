@@ -57,7 +57,7 @@ const navigate = useNavigate();
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/courses');
+      const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses');
       const data = await response.json();
       setCourses(data);
     } catch (err) {
@@ -73,7 +73,7 @@ const navigate = useNavigate();
   const confirmDeleteCourse = async () => {
     if (!courseToDelete) return;
     try {
-      const response = await fetch(`/api/courses/${courseToDelete}`, {
+      const response = await fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${courseToDelete}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -206,7 +206,7 @@ const navigate = useNavigate();
     setPasswordLoading(true);
 
     try {
-      const response = await fetch('/api/auth/update-password', {
+      const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/auth/update-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
