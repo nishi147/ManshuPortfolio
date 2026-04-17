@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Edit, Trash, X, Plus } from 'lucide-react';
+import { Edit, Trash, X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../components/common/ConfirmModal';
 import './AdminDashboard.css';
 
@@ -86,6 +86,35 @@ const navigate = useNavigate();
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleReorder = async (index, direction) => {
+    const newCourses = [...courses];
+    
+    if (direction === 'up' && index > 0) {
+      [newCourses[index - 1], newCourses[index]] = [newCourses[index], newCourses[index - 1]];
+    } else if (direction === 'down' && index < newCourses.length - 1) {
+      [newCourses[index], newCourses[index + 1]] = [newCourses[index + 1], newCourses[index]];
+    } else {
+      return;
+    }
+
+    setCourses(newCourses);
+
+    const orderedIds = newCourses.map(c => c._id);
+
+    try {
+      await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses/reorder', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ orderedIds })
+      });
+    } catch (err) {
+      console.error('Failed to reorder', err);
     }
   };
 
@@ -463,13 +492,19 @@ const navigate = useNavigate();
               <h3>Manage Courses</h3>
               {courses.length > 0 ? (
                 <ul className="admin-list">
-                  {courses.map(course => (
+                  {courses.map((course, index) => (
                     <li key={course._id} className="admin-list-item">
                       <div className="course-item-info">
                         <strong>{course.title}</strong>
                         <span className="badge">{course.isPublic ? 'Public' : 'Private'}</span>
                       </div>
                       <div className="course-item-actions">
+                        <button className="icon-btn" disabled={index === 0} onClick={() => handleReorder(index, 'up')} title="Move Up">
+                          <ChevronUp size={18} />
+                        </button>
+                        <button className="icon-btn" disabled={index === courses.length - 1} onClick={() => handleReorder(index, 'down')} title="Move Down">
+                          <ChevronDown size={18} />
+                        </button>
                         <button className="icon-btn" title="Edit" onClick={() => handleEdit(course)}>
                           <Edit size={18} />
                         </button>

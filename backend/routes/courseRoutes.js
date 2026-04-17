@@ -7,6 +7,21 @@ const Video = require('../models/Video');
 const crypto = require('crypto');
 const { upload } = require('../config/cloudinary');
 
+// @desc    Reorder courses
+// @route   PUT /api/courses/reorder
+router.put('/reorder', protect, admin, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    // Iterate and update order
+    for (let i = 0; i < orderedIds.length; i++) {
+        await Course.findByIdAndUpdate(orderedIds[i], { order: i });
+    }
+    res.json({ message: 'Courses reordered successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @desc    Update course
 // @route   PUT /api/courses/:id
 router.put('/:id', protect, admin, upload.fields([
@@ -56,7 +71,7 @@ router.put('/:id', protect, admin, upload.fields([
 // @route   GET /api/courses
 router.get('/', async (req, res) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find().sort({ order: 1, createdAt: -1 });
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });

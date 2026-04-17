@@ -7,6 +7,10 @@ const courseSchema = mongoose.Schema(
       required: true,
     },
 
+    order: {
+      type: Number,
+      default: 0
+    },
     category: {
       type: String,
       required: true,
