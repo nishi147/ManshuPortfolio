@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://manshuportfolioo.onrender.com/api/:path*"
+      "destination": "https://manshu-portfolio-frhd.vercel.app/api/:path*"
     },
     {
       "source": "/(.*)",
