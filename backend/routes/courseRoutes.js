@@ -110,6 +110,7 @@ router.post('/', protect, admin, (req, res, next) => {
     const { title, category, isPublic, password, demoVideo: bodyDemoVideo } = req.body;
     
     try {
+      console.log('--- DB Save Process Started ---');
       const shareableLink = crypto.randomBytes(8).toString('hex');
       
       // Extract file paths safely
@@ -119,12 +120,15 @@ router.post('/', protect, admin, (req, res, next) => {
       if (req.files) {
         if (req.files['thumbnail'] && req.files['thumbnail'][0]) {
           thumbnail = req.files['thumbnail'][0].path;
+          console.log('Thumbnail path:', thumbnail);
         }
         if (!demoVideo && req.files['demoVideo'] && req.files['demoVideo'][0]) {
           demoVideo = req.files['demoVideo'][0].path;
+          console.log('DemoVideo path:', demoVideo);
         }
       }
 
+    console.log('Creating course document...');
     const course = new Course({
       title,
       category,
@@ -135,6 +139,7 @@ router.post('/', protect, admin, (req, res, next) => {
       shareableLink
     });
     
+    console.log('Saving to MongoDB...');
     const createdCourse = await course.save();
     console.log('Course saved successfully:', createdCourse._id);
     res.status(201).json(createdCourse);

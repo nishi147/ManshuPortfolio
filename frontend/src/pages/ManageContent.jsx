@@ -173,6 +173,7 @@ const ManageContent = () => {
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://manshu-portfolio-frhd.vercel.app/api/videos', true);
+        xhr.timeout = 120000; // 120 seconds for video
         xhr.setRequestHeader('Authorization', `Bearer ${user.token}`);
 
         xhr.upload.onprogress = (event) => {
@@ -195,8 +196,19 @@ const ManageContent = () => {
                 setActiveModuleId(null);
                 fetchCourseData();
             } else {
-                setError('Failed to upload video');
+                if (xhr.status === 504) {
+                  setError('Server Timeout (Video is large or connection is slow).');
+                } else if (xhr.status === 413) {
+                  setError('Video file is too large for the server limits.');
+                } else {
+                  setError(`Upload failed (${xhr.status}): ${xhr.statusText || 'Unknown error'}`);
+                }
             }
+        };
+
+        xhr.ontimeout = () => {
+            setUploading(false);
+            setError('Upload timed out. The video file might be too large for the server to process.');
         };
 
         xhr.onerror = () => {

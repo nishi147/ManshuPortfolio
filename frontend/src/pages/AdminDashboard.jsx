@@ -176,6 +176,7 @@ const navigate = useNavigate();
       
       console.log(`Starting Upload: ${method} ${url}`);
       xhr.open(method, url, true);
+      xhr.timeout = 60000; // 60 seconds timeout
       xhr.setRequestHeader('Authorization', `Bearer ${user.token}`);
 
       xhr.upload.onprogress = (event) => {
@@ -198,12 +199,23 @@ const navigate = useNavigate();
           console.error(`XHR Error Status: ${xhr.status}`);
           console.error(`XHR Error Response: ${xhr.responseText}`);
           try {
-            const errorData = JSON.parse(xhr.responseText);
-            setError(errorData.message || 'Failed to process request');
+            if (xhr.status === 504) {
+              setError('Server Timeout (Cloudinary taking too long). Try a smaller image.');
+            } else if (xhr.status === 413) {
+              setError('File too large for server limits.');
+            } else {
+              const errorData = JSON.parse(xhr.responseText);
+              setError(errorData.message || 'Failed to process request');
+            }
           } catch (e) {
-            setError(`Server Error (${xhr.status}): ${xhr.statusText}`);
+            setError(`Server Error (${xhr.status}): ${xhr.statusText || 'Upload failed'}`);
           }
         }
+      };
+
+      xhr.ontimeout = () => {
+        setLoading(false);
+        setError('Request timed out. The server is taking too long to respond.');
       };
 
       xhr.onerror = () => {
