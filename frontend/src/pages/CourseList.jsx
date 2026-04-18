@@ -129,7 +129,7 @@ const CourseList = () => {
                     </div>
                     <div className="portfolio-footer">
                         {course.demoVideo ? (
-                          <a href={course.demoVideo} target="_blank" rel="noopener noreferrer" className="portfolio-btn">
+                          <a href={course.demoVideo.startsWith('http') ? course.demoVideo : `https://${course.demoVideo}`} target="_blank" rel="noopener noreferrer" className="portfolio-btn">
                             View Course <ChevronRight size={14} />
                           </a>
                         ) : (

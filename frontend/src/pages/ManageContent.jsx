@@ -172,7 +172,7 @@ const ManageContent = () => {
         formData.append('order', (mod.videos?.length || 0) + 1);
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/videos', true);
+        xhr.open('POST', 'https://manshu-portfolio-frhd.vercel.app/api/videos', true);
         xhr.setRequestHeader('Authorization', `Bearer ${user.token}`);
 
         xhr.upload.onprogress = (event) => {
@@ -293,7 +293,7 @@ const ManageContent = () => {
                                                         <div className="session-info">
                                                             <Video size={14} />
                                                             <span>{vid.title}</span>
-                                                            <a href={vid.url} target="_blank" rel="noopener noreferrer" className="demo-link">
+                                                            <a href={vid.url ? (vid.url.startsWith('http') ? vid.url : `https://${vid.url}`) : '#'} target="_blank" rel="noopener noreferrer" className="demo-link">
                                                                 <Play size={12} /> Watch Demo
                                                             </a>
                                                         </div>

@@ -172,7 +172,7 @@ const navigate = useNavigate();
       const xhr = new XMLHttpRequest();
       const method = isEditing ? 'PUT' : 'POST';
       const cleanId = String(editingCourseId).trim();
-      const url = isEditing ? `/api/courses/${cleanId}` : '/api/courses';
+      const url = isEditing ? `https://manshu-portfolio-frhd.vercel.app/api/courses/${cleanId}` : 'https://manshu-portfolio-frhd.vercel.app/api/courses';
       
       console.log(`Starting Upload: ${method} ${url}`);
       xhr.open(method, url, true);
