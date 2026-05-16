@@ -5,9 +5,18 @@ import { Edit, Trash, X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../components/common/ConfirmModal';
 import './AdminDashboard.css';
 
+const getBaseUrl = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000';
+  }
+  return 'https://manshu-portfolio-frhd.vercel.app';
+};
+
+const BASE_URL = getBaseUrl();
+
 const AdminDashboard = () => {
   const { user, login } = useContext(AuthContext);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +28,7 @@ const navigate = useNavigate();
     title: '', category: '', isPublic: true, demoVideo: ''
   });
   const [thumbnail, setThumbnail] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -57,7 +67,7 @@ const navigate = useNavigate();
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses');
+      const response = await fetch(`${BASE_URL}/api/courses`);
       const data = await response.json();
       setCourses(data);
     } catch (err) {
@@ -73,7 +83,7 @@ const navigate = useNavigate();
   const confirmDeleteCourse = async () => {
     if (!courseToDelete) return;
     try {
-      const response = await fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${courseToDelete}`, {
+      const response = await fetch(`${BASE_URL}/api/courses/${courseToDelete}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -105,7 +115,7 @@ const navigate = useNavigate();
     const orderedIds = newCourses.map(c => c._id);
 
     try {
-      await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses/reorder', {
+      await fetch(`${BASE_URL}/api/courses/reorder`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -136,6 +146,7 @@ const navigate = useNavigate();
     setEditingCourseId(null);
     setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '' });
     setThumbnail(null);
+    setVideoFile(null);
     setIsNewCategory(false);
   };
 
@@ -149,6 +160,36 @@ const navigate = useNavigate();
     }
   };
 
+  const uploadToCloudinary = async (file, type = 'image') => {
+    // 1. Get Signature
+    const sigRes = await fetch(`${BASE_URL}/api/courses/signature`, {
+      headers: { Authorization: `Bearer ${user.token}` }
+    });
+    if (!sigRes.ok) throw new Error('Failed to get upload signature');
+    const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+
+    // 2. Upload to Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('signature', signature);
+    formData.append('timestamp', timestamp);
+    formData.append('api_key', apiKey);
+    formData.append('folder', 'manshu_uploads');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${type}/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error?.message || 'Cloudinary upload failed');
+    }
+    
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     setError('');
@@ -157,76 +198,69 @@ const navigate = useNavigate();
     if (thumbnail && thumbnail.size > FILE_SIZE_LIMITS.thumbnail) {
       return setError('Thumbnail size should be less than 5MB');
     }
+    if (videoFile && videoFile.size > FILE_SIZE_LIMITS.video) {
+      return setError('Video size should be less than 100MB');
+    }
 
     setLoading(true);
-    setUploadProgress(0);
+    setUploadProgress(10); // Start progress
 
     try {
-      const formData = new FormData();
-      formData.append('title', courseFormData.title);
-      formData.append('category', courseFormData.category);
-      formData.append('isPublic', courseFormData.isPublic);
-      formData.append('demoVideo', courseFormData.demoVideo);
-      if (thumbnail) formData.append('thumbnail', thumbnail);
+      let finalThumbnailUrl = '';
+      let finalVideoUrl = courseFormData.demoVideo;
 
-      const xhr = new XMLHttpRequest();
+      // Direct Upload Thumbnail if selected
+      if (thumbnail) {
+        setUploadProgress(20);
+        finalThumbnailUrl = await uploadToCloudinary(thumbnail, 'image');
+      }
+
+      // Direct Upload Video if selected
+      if (videoFile) {
+        setUploadProgress(50);
+        finalVideoUrl = await uploadToCloudinary(videoFile, 'video');
+      }
+
+      setUploadProgress(90);
+
+      const payload = {
+        title: courseFormData.title,
+        category: courseFormData.category,
+        isPublic: courseFormData.isPublic,
+        demoVideo: finalVideoUrl,
+        thumbnail: finalThumbnailUrl || undefined
+      };
+
       const method = isEditing ? 'PUT' : 'POST';
       const cleanId = String(editingCourseId).trim();
-      const url = isEditing ? `https://manshu-portfolio-frhd.vercel.app/api/courses/${cleanId}` : 'https://manshu-portfolio-frhd.vercel.app/api/courses';
+      const url = isEditing ? `${BASE_URL}/api/courses/${cleanId}` : `${BASE_URL}/api/courses`;
       
-      console.log(`Starting Upload: ${method} ${url}`);
-      xhr.open(method, url, true);
-      xhr.timeout = 60000; // 60 seconds timeout
-      xhr.setRequestHeader('Authorization', `Bearer ${user.token}`);
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify(payload)
+      });
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(percentComplete);
-        }
-      };
-
-      xhr.onload = () => {
+      if (response.ok) {
         setLoading(false);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '' });
-          setThumbnail(null);
-          setIsEditing(false);
-          setEditingCourseId(null);
-          setUploadProgress(0);
-          fetchCourses();
-        } else {
-          console.error(`XHR Error Status: ${xhr.status}`);
-          console.error(`XHR Error Response: ${xhr.responseText}`);
-          try {
-            if (xhr.status === 504) {
-              setError('Server Timeout (Cloudinary taking too long). Try a smaller image.');
-            } else if (xhr.status === 413) {
-              setError('File too large for server limits.');
-            } else {
-              const errorData = JSON.parse(xhr.responseText);
-              setError(errorData.message || 'Failed to process request');
-            }
-          } catch (e) {
-            setError(`Server Error (${xhr.status}): ${xhr.statusText || 'Upload failed'}`);
-          }
-        }
-      };
-
-      xhr.ontimeout = () => {
+        setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '' });
+        setThumbnail(null);
+        setVideoFile(null);
+        setIsEditing(false);
+        setEditingCourseId(null);
+        setUploadProgress(0);
+        fetchCourses();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to process request');
         setLoading(false);
-        setError('Request timed out. The server is taking too long to respond.');
-      };
-
-      xhr.onerror = () => {
-        setLoading(false);
-        setError('Network error during upload');
-      };
-
-      xhr.send(formData);
+      }
     } catch (err) {
       console.error(err);
-      setError('An error occurred while creating the course');
+      setError(err.message || 'An error occurred while creating the course');
       setLoading(false);
     }
   };
@@ -247,7 +281,7 @@ const navigate = useNavigate();
     setPasswordLoading(true);
 
     try {
-      const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/auth/update-password', {
+      const response = await fetch(`${BASE_URL}/api/auth/update-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -467,6 +501,10 @@ const navigate = useNavigate();
                       value={courseFormData.demoVideo} 
                       onChange={e => setCourseFormData({...courseFormData, demoVideo: e.target.value})} 
                     />
+                  </div>
+                  <div className="form-group">
+                    <label>OR Upload Demo Video</label>
+                    <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files[0])} />
                   </div>
                   <div className="form-group">
                     <label>Thumbnail (Image)</label>

@@ -5,7 +5,30 @@ const Course = require('../models/Course');
 const Module = require('../models/Module');
 const Video = require('../models/Video');
 const crypto = require('crypto');
-const { upload } = require('../config/cloudinary');
+const { upload, cloudinary } = require('../config/cloudinary');
+
+// @desc    Get Cloudinary Signature for Direct Upload
+// @route   GET /api/courses/signature
+router.get('/signature', protect, admin, (req, res) => {
+  try {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp: timestamp,
+        folder: 'manshu_uploads',
+      },
+      process.env.CLOUDINARY_API_SECRET
+    );
+    res.json({
+      signature,
+      timestamp,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: process.env.CLOUDINARY_API_KEY,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // @desc    Reorder courses
 // @route   PUT /api/courses/reorder
@@ -26,7 +49,7 @@ router.put('/reorder', protect, admin, async (req, res) => {
 // @route   PUT /api/courses/:id
 router.put('/:id', protect, admin, upload.fields([
   { name: 'thumbnail', maxCount: 1 },
-  { name: 'demoVideo', maxCount: 1 }
+  { name: 'demoVideoFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -34,7 +57,7 @@ router.put('/:id', protect, admin, upload.fields([
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    const { title, category, isPublic, password, demoVideo } = req.body;
+    const { title, category, isPublic, password, demoVideo, thumbnail } = req.body;
     
     course.title = title || course.title;
 
@@ -44,7 +67,9 @@ router.put('/:id', protect, admin, upload.fields([
     }
     course.password = password !== undefined ? password : course.password;
     
-    // Priority: Body (Link) > Uploaded File
+    if (thumbnail) {
+      course.thumbnail = thumbnail;
+    }
     if (demoVideo) {
       course.demoVideo = demoVideo;
     }
@@ -53,9 +78,9 @@ router.put('/:id', protect, admin, upload.fields([
       if (req.files['thumbnail'] && req.files['thumbnail'][0]) {
         course.thumbnail = req.files['thumbnail'][0].path;
       }
-      // If no link provided in body, check uploaded file
-      if (!demoVideo && req.files['demoVideo'] && req.files['demoVideo'][0]) {
-        course.demoVideo = req.files['demoVideo'][0].path;
+      // Check for video file upload
+      if (req.files['demoVideoFile'] && req.files['demoVideoFile'][0]) {
+        course.demoVideo = req.files['demoVideoFile'][0].path;
       }
     }
 
@@ -100,21 +125,21 @@ router.post('/', protect, admin, (req, res, next) => {
   next();
 }, upload.fields([
   { name: 'thumbnail', maxCount: 1 },
-  { name: 'demoVideo', maxCount: 1 },
+  { name: 'demoVideoFile', maxCount: 1 },
   { name: 'curriculum', maxCount: 1 }
 ]), async (req, res) => {
   console.log('Multer processing complete.');
   console.log('Body data received:', req.body);
   console.log('Files received:', req.files ? Object.keys(req.files) : 'None');
   
-    const { title, category, isPublic, password, demoVideo: bodyDemoVideo } = req.body;
+    const { title, category, isPublic, password, demoVideo: bodyDemoVideo, thumbnail: bodyThumbnail } = req.body;
     
     try {
       console.log('--- DB Save Process Started ---');
       const shareableLink = crypto.randomBytes(8).toString('hex');
       
       // Extract file paths safely
-      let thumbnail = '';
+      let thumbnail = bodyThumbnail || '';
       let demoVideo = bodyDemoVideo || ''; // Use link from body if provided
 
       if (req.files) {
@@ -122,9 +147,9 @@ router.post('/', protect, admin, (req, res, next) => {
           thumbnail = req.files['thumbnail'][0].path;
           console.log('Thumbnail path:', thumbnail);
         }
-        if (!demoVideo && req.files['demoVideo'] && req.files['demoVideo'][0]) {
-          demoVideo = req.files['demoVideo'][0].path;
-          console.log('DemoVideo path:', demoVideo);
+        if (req.files['demoVideoFile'] && req.files['demoVideoFile'][0]) {
+          demoVideo = req.files['demoVideoFile'][0].path;
+          console.log('Video file path:', demoVideo);
         }
       }
 
