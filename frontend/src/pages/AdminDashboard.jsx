@@ -128,6 +128,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleToggleVisibility = async (course) => {
+    try {
+      const nextPublicState = !course.isPublic;
+      
+      // Snappy Optimistic UI update
+      setCourses(prevCourses => 
+        prevCourses.map(c => 
+          c._id === course._id ? { ...c, isPublic: nextPublicState } : c
+        )
+      );
+
+      const response = await fetch(`${BASE_URL}/api/courses/${course._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          isPublic: nextPublicState
+        })
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to update course visibility');
+        fetchCourses(); // Re-fetch to get correct state
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred while updating visibility');
+      fetchCourses(); // Re-fetch to revert state
+    }
+  };
+
   const handleEdit = (course) => {
     setIsEditing(true);
     setEditingCourseId(course._id);
@@ -546,7 +581,20 @@ const AdminDashboard = () => {
                     <li key={course._id} className="admin-list-item">
                       <div className="course-item-info">
                         <strong>{course.title}</strong>
-                        <span className="badge">{course.isPublic ? 'Public' : 'Private'}</span>
+                        <span className={`badge ${course.isPublic ? 'public' : 'private'}`}>
+                          {course.isPublic ? 'Public' : 'Private'}
+                        </span>
+                        
+                        <div className="visibility-switch-container" title={course.isPublic ? 'Click to Hide Course' : 'Click to Show Course'}>
+                          <label className="switch-toggle">
+                            <input 
+                              type="checkbox" 
+                              checked={course.isPublic} 
+                              onChange={() => handleToggleVisibility(course)}
+                            />
+                            <span className="slider-round"></span>
+                          </label>
+                        </div>
                       </div>
                       <div className="course-item-actions">
                         <button className="icon-btn" disabled={index === 0} onClick={() => handleReorder(index, 'up')} title="Move Up">
