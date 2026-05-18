@@ -305,7 +305,12 @@ const ManageContent = () => {
                                                         <div className="session-info">
                                                             <Video size={14} />
                                                             <span>{vid.title}</span>
-                                                            <a href={vid.url ? ((vid.url.startsWith('http') || vid.url.startsWith('/')) ? vid.url : `https://${vid.url}`) : '#'} target="_blank" rel="noopener noreferrer" className="demo-link">
+                                                            <a 
+                                                                href={vid.url ? `/preview?url=${encodeURIComponent(vid.url)}&title=${encodeURIComponent(vid.title || 'Session Demo')}` : '#'} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="demo-link"
+                                                            >
                                                                 <Play size={12} /> Watch Demo
                                                             </a>
                                                         </div>

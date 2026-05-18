@@ -9,6 +9,7 @@ import CourseList from './pages/CourseList';
 import CourseDetail from './pages/CourseDetail';
 import CoursePlayer from './pages/CoursePlayer';
 import ManageContent from './pages/ManageContent';
+import VideoPreview from './pages/VideoPreview';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/course/:id" element={<CourseDetail />} />
             <Route path="/admin/course/:id/content" element={<ManageContent />} />
             <Route path="/play/:courseId" element={<CoursePlayer />} />
+            <Route path="/preview" element={<VideoPreview />} />
           </Routes>
         </main>
         <Footer />

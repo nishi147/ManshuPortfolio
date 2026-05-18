@@ -98,10 +98,15 @@ const LandingPage = () => {
                     {course.title}
                   </div>
                   <div className="portfolio-footer">
-                     {course.demoVideo ? (
-                       <a href={(course.demoVideo.startsWith('http') || course.demoVideo.startsWith('/')) ? course.demoVideo : `https://${course.demoVideo}`} target="_blank" rel="noopener noreferrer" className="portfolio-btn">
-                         View Course
-                       </a>
+                      {course.demoVideo ? (
+                        <a 
+                          href={`/preview?url=${encodeURIComponent(course.demoVideo)}&title=${encodeURIComponent(course.title)}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="portfolio-btn"
+                        >
+                          View Course
+                        </a>
                      ) : (
                        <Link to={`/course/${course._id}`} className="portfolio-btn">
                          View Details
