@@ -4,6 +4,15 @@ import { Link } from 'react-router-dom';
 import { Filter, X, ChevronRight } from 'lucide-react';
 import './CourseList.css';
 
+const isVideoUrl = (url) => {
+  if (!url) return false;
+  const lowercaseUrl = url.toLowerCase();
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.3gp', '.m4v'];
+  return videoExtensions.some(ext => lowercaseUrl.includes(ext)) || 
+         lowercaseUrl.includes('video/upload') || 
+         (lowercaseUrl.includes('res.cloudinary.com') && lowercaseUrl.includes('/video/'));
+};
+
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState('');
@@ -130,7 +139,9 @@ const CourseList = () => {
                     <div className="portfolio-footer">
                         {course.demoVideo ? (
                           <a 
-                            href={`/preview?url=${encodeURIComponent(course.demoVideo)}&title=${encodeURIComponent(course.title)}`} 
+                            href={isVideoUrl(course.demoVideo) 
+                              ? `/preview?url=${encodeURIComponent(course.demoVideo)}&title=${encodeURIComponent(course.title)}` 
+                              : (course.demoVideo.startsWith('http') || course.demoVideo.startsWith('/') ? course.demoVideo : `https://${course.demoVideo}`)} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="portfolio-btn"

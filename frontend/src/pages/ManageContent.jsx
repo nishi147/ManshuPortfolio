@@ -5,6 +5,15 @@ import { Plus, Trash, Video, ChevronDown, ChevronUp, Loader, Play } from 'lucide
 import ConfirmModal from '../components/common/ConfirmModal';
 import './AdminDashboard.css'; // Reusing some styles
 
+const isVideoUrl = (url) => {
+    if (!url) return false;
+    const lowercaseUrl = url.toLowerCase();
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.3gp', '.m4v'];
+    return videoExtensions.some(ext => lowercaseUrl.includes(ext)) || 
+           lowercaseUrl.includes('video/upload') || 
+           (lowercaseUrl.includes('res.cloudinary.com') && lowercaseUrl.includes('/video/'));
+};
+
 const ManageContent = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -306,7 +315,7 @@ const ManageContent = () => {
                                                             <Video size={14} />
                                                             <span>{vid.title}</span>
                                                             <a 
-                                                                href={vid.url ? `/preview?url=${encodeURIComponent(vid.url)}&title=${encodeURIComponent(vid.title || 'Session Demo')}` : '#'} 
+                                                                href={vid.url ? (isVideoUrl(vid.url) ? `/preview?url=${encodeURIComponent(vid.url)}&title=${encodeURIComponent(vid.title || 'Session Demo')}` : (vid.url.startsWith('http') || vid.url.startsWith('/') ? vid.url : `https://${vid.url}`)) : '#'} 
                                                                 target="_blank" 
                                                                 rel="noopener noreferrer" 
                                                                 className="demo-link"
