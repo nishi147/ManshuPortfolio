@@ -184,8 +184,8 @@ const CoursePlayer = () => {
                                         autoPlay
                                         className="articulate-video-element"
                                         onEnded={() => !isCompleted(activeSession._id) && toggleComplete(activeSession._id)}
-                                        controlsList={course?.restrictDownloads ? "nodownload" : undefined}
-                                        onContextMenu={course?.restrictDownloads ? (e) => e.preventDefault() : undefined}
+                                        controlsList="nodownload"
+                                        onContextMenu={(e) => e.preventDefault()}
                                     />
                                 </div>
 
