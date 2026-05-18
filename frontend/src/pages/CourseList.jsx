@@ -128,15 +128,9 @@ const CourseList = () => {
                     {course.title}
                     </div>
                     <div className="portfolio-footer">
-                        {(course.demoVideo && !course.restrictDownloads) ? (
-                          <a href={(course.demoVideo.startsWith('http') || course.demoVideo.startsWith('/')) ? course.demoVideo : `https://${course.demoVideo}`} target="_blank" rel="noopener noreferrer" className="portfolio-btn">
-                            View Course <ChevronRight size={14} />
-                          </a>
-                        ) : (
-                          <Link to={`/course/${course._id}`} className="portfolio-btn">
-                            View Details <ChevronRight size={14} />
-                          </Link>
-                        )}
+                        <Link to={`/course/${course._id}`} className="portfolio-btn">
+                          View Course <ChevronRight size={14} />
+                        </Link>
                     </div>
                 </motion.div>
                 ))}
