@@ -64,7 +64,7 @@ const CourseDetail = () => {
                   <Play size={20} fill="currentColor" /> Start Learning
                 </Link>
                 
-                {course.curriculum && (
+                {course.curriculum && !course.restrictDownloads && (
                   <a href={course.curriculum} target="_blank" rel="noopener noreferrer" className="btn btn-secondary curriculum-btn">
                     <Download size={18} /> Download Syllabus
                   </a>
@@ -91,6 +91,8 @@ const CourseDetail = () => {
                         controls 
                         className="preview-video" 
                         poster={course.thumbnail}
+                        controlsList={course.restrictDownloads ? "nodownload" : undefined}
+                        onContextMenu={course.restrictDownloads ? (e) => e.preventDefault() : undefined}
                       />
                     )
                   ) : course.thumbnail ? (
