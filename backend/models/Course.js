@@ -32,10 +32,6 @@ const courseSchema = mongoose.Schema(
     password: {
       type: String,
     },
-    restrictDownloads: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,

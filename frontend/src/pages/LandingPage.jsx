@@ -98,9 +98,15 @@ const LandingPage = () => {
                     {course.title}
                   </div>
                   <div className="portfolio-footer">
-                     <Link to={`/course/${course._id}`} className="portfolio-btn">
-                       View Course
-                     </Link>
+                     {course.demoVideo ? (
+                       <a href={(course.demoVideo.startsWith('http') || course.demoVideo.startsWith('/')) ? course.demoVideo : `https://${course.demoVideo}`} target="_blank" rel="noopener noreferrer" className="portfolio-btn">
+                         View Course
+                       </a>
+                     ) : (
+                       <Link to={`/course/${course._id}`} className="portfolio-btn">
+                         View Details
+                       </Link>
+                     )}
                   </div>
                 </motion.div>
               ))

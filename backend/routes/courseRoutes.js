@@ -57,16 +57,13 @@ router.put('/:id', protect, admin, upload.fields([
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    const { title, category, isPublic, password, demoVideo, thumbnail, restrictDownloads } = req.body;
+    const { title, category, isPublic, password, demoVideo, thumbnail } = req.body;
     
     course.title = title || course.title;
 
     course.category = category || course.category;
     if (isPublic !== undefined) {
       course.isPublic = isPublic === 'true' || isPublic === true;
-    }
-    if (restrictDownloads !== undefined) {
-      course.restrictDownloads = restrictDownloads === 'true' || restrictDownloads === true;
     }
     course.password = password !== undefined ? password : course.password;
     
@@ -135,7 +132,7 @@ router.post('/', protect, admin, (req, res, next) => {
   console.log('Body data received:', req.body);
   console.log('Files received:', req.files ? Object.keys(req.files) : 'None');
   
-    const { title, category, isPublic, password, demoVideo: bodyDemoVideo, thumbnail: bodyThumbnail, restrictDownloads } = req.body;
+    const { title, category, isPublic, password, demoVideo: bodyDemoVideo, thumbnail: bodyThumbnail } = req.body;
     
     try {
       console.log('--- DB Save Process Started ---');
@@ -164,8 +161,7 @@ router.post('/', protect, admin, (req, res, next) => {
       demoVideo,
       isPublic: isPublic === 'true' || isPublic === true,
       password,
-      shareableLink,
-      restrictDownloads: restrictDownloads === 'true' || restrictDownloads === true
+      shareableLink
     });
     
     console.log('Saving to MongoDB...');

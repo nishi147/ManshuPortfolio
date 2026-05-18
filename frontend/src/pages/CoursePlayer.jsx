@@ -17,7 +17,6 @@ const CoursePlayer = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('MENU');
     const [expandedModules, setExpandedModules] = useState({});
-    const [course, setCourse] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -29,21 +28,18 @@ const CoursePlayer = () => {
 
     const fetchData = async () => {
         try {
-            const [curriculumRes, progressRes, courseRes] = await Promise.all([
+            const [curriculumRes, progressRes] = await Promise.all([
                 fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${courseId}/curriculum`),
                 fetch(`https://manshu-portfolio-frhd.vercel.app/api/progress/${courseId}`, {
                     headers: { Authorization: `Bearer ${user.token}` }
-                }),
-                fetch(`https://manshu-portfolio-frhd.vercel.app/api/courses/${courseId}`)
+                })
             ]);
             
             const curriculumData = await curriculumRes.json();
             const progressData = await progressRes.json();
-            const courseData = await courseRes.json();
             
             setCurriculum(curriculumData);
             setCompletedLessons(progressData.completedLessons || []);
-            setCourse(courseData);
             
             // Auto-select first session
             if (curriculumData.length > 0 && curriculumData[0].videos?.length > 0) {
@@ -184,8 +180,6 @@ const CoursePlayer = () => {
                                         autoPlay
                                         className="articulate-video-element"
                                         onEnded={() => !isCompleted(activeSession._id) && toggleComplete(activeSession._id)}
-                                        controlsList="nodownload"
-                                        onContextMenu={(e) => e.preventDefault()}
                                     />
                                 </div>
 
@@ -229,7 +223,7 @@ const CoursePlayer = () => {
                                                 {isCompleted(activeSession._id) ? 'Lesson Completed' : 'Mark as Complete'}
                                             </button>
 
-                                            {activeSession.pdfUrl && !course?.restrictDownloads && (
+                                            {activeSession.pdfUrl && (
                                                 <a href={activeSession.pdfUrl} download target="_blank" rel="noopener noreferrer" className="btn-pdf">
                                                     <Download size={18} /> Download Curriculum
                                                 </a>

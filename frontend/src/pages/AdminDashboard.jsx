@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   const [courses, setCourses] = useState([]);
   // Form stats
   const [courseFormData, setCourseFormData] = useState({
-    title: '', category: '', isPublic: true, demoVideo: '', restrictDownloads: false
+    title: '', category: '', isPublic: true, demoVideo: ''
   });
   const [thumbnail, setThumbnail] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
@@ -135,8 +135,7 @@ const AdminDashboard = () => {
       title: course.title,
       category: course.category,
       isPublic: course.isPublic,
-      demoVideo: course.demoVideo || '',
-      restrictDownloads: course.restrictDownloads || false
+      demoVideo: course.demoVideo || ''
     });
     // Scroll to form
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -145,7 +144,7 @@ const AdminDashboard = () => {
   const cancelEdit = () => {
     setIsEditing(false);
     setEditingCourseId(null);
-    setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '', restrictDownloads: false });
+    setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '' });
     setThumbnail(null);
     setVideoFile(null);
     setIsNewCategory(false);
@@ -229,8 +228,7 @@ const AdminDashboard = () => {
         category: courseFormData.category,
         isPublic: courseFormData.isPublic,
         demoVideo: finalVideoUrl,
-        thumbnail: finalThumbnailUrl || undefined,
-        restrictDownloads: courseFormData.restrictDownloads
+        thumbnail: finalThumbnailUrl || undefined
       };
 
       const method = isEditing ? 'PUT' : 'POST';
@@ -248,7 +246,7 @@ const AdminDashboard = () => {
 
       if (response.ok) {
         setLoading(false);
-        setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '', restrictDownloads: false });
+        setCourseFormData({ title: '', category: '', isPublic: true, demoVideo: '' });
         setThumbnail(null);
         setVideoFile(null);
         setIsEditing(false);
@@ -516,12 +514,6 @@ const AdminDashboard = () => {
                     <label>
                       <input type="checkbox" checked={courseFormData.isPublic} onChange={e => setCourseFormData({...courseFormData, isPublic: e.target.checked})}/>
                       Public Course
-                    </label>
-                  </div>
-                  <div className="form-group checkbox-group">
-                    <label>
-                      <input type="checkbox" checked={courseFormData.restrictDownloads} onChange={e => setCourseFormData({...courseFormData, restrictDownloads: e.target.checked})}/>
-                      Restrict Downloads (viewer cannot download attachments or videos)
                     </label>
                   </div>
                   <button type="submit" className="btn btn-primary" disabled={loading}>
