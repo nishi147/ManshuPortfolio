@@ -96,8 +96,37 @@ router.put('/:id', protect, admin, upload.fields([
 // @route   GET /api/courses
 router.get('/', async (req, res) => {
   try {
-    const courses = await Course.find().sort({ order: 1, createdAt: -1 });
+    let courses = await Course.find().sort({ order: 1, createdAt: -1 });
+    
+    // Sort in JS to guarantee featured courses are at the top, 
+    // avoiding MongoDB type sorting issues where 'false' > 'null'.
+    courses = courses.sort((a, b) => {
+      const aFeatured = a.isFeatured === true;
+      const bFeatured = b.isFeatured === true;
+      if (aFeatured && !bFeatured) return -1;
+      if (!aFeatured && bFeatured) return 1;
+      return 0;
+    });
+
     res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Toggle featured status
+// @route   PUT /api/courses/:id/feature
+router.put('/:id/feature', protect, admin, async (req, res) => {
+  try {
+    const { isFeatured } = req.body;
+    if (isFeatured) {
+      const featuredCount = await Course.countDocuments({ isFeatured: true });
+      if (featuredCount >= 3) {
+        return res.status(400).json({ message: 'You can only feature up to 3 courses at a time. Please unfeature a course first.' });
+      }
+    }
+    const course = await Course.findByIdAndUpdate(req.params.id, { isFeatured }, { new: true });
+    res.json(course);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

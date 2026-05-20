@@ -26,6 +26,10 @@ const courseSchema = mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
     shareableLink: {
       type: String,
     },

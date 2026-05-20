@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Edit, Trash, X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Edit, Trash, X, Plus, ChevronUp, ChevronDown, Star } from 'lucide-react';
 import ConfirmModal from '../components/common/ConfirmModal';
 import './AdminDashboard.css';
 
@@ -160,6 +160,52 @@ const AdminDashboard = () => {
       console.error(err);
       setError('An error occurred while updating visibility');
       fetchCourses(); // Re-fetch to revert state
+    }
+  };
+
+  const handleToggleFeatured = async (course) => {
+    try {
+      const nextFeaturedState = !course.isFeatured;
+      
+      // Snappy Optimistic UI update
+      setCourses(prevCourses => 
+        prevCourses.map(c => 
+          c._id === course._id ? { ...c, isFeatured: nextFeaturedState } : c
+        )
+      );
+      
+      const response = await fetch(`${BASE_URL}/api/courses/${course._id}/feature`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          isFeatured: nextFeaturedState
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to update featured status';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // If response is not JSON (e.g. 404 page)
+          errorMessage = 'Server error. Did you restart the backend?';
+        }
+        setError(errorMessage);
+        setTimeout(() => setError(''), 5000);
+        fetchCourses(); // Revert state
+      } else {
+        // Fetch to ensure correct order is applied from backend
+        fetchCourses();
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred while updating featured status');
+      setTimeout(() => setError(''), 5000);
+      fetchCourses(); // Revert state
     }
   };
 
@@ -597,6 +643,9 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className="course-item-actions">
+                        <button className="icon-btn" title={course.isFeatured ? 'Unfeature Course (Remove from Top 3)' : 'Feature Course (Pin to Top 3)'} onClick={() => handleToggleFeatured(course)}>
+                          <Star size={18} fill={course.isFeatured ? "#ffd700" : "none"} color={course.isFeatured ? "#ffd700" : "currentColor"} />
+                        </button>
                         <button className="icon-btn" disabled={index === 0} onClick={() => handleReorder(index, 'up')} title="Move Up">
                           <ChevronUp size={18} />
                         </button>

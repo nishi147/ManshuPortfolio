@@ -13,13 +13,22 @@ const isVideoUrl = (url) => {
          (lowercaseUrl.includes('res.cloudinary.com') && lowercaseUrl.includes('/video/'));
 };
 
+const getBaseUrl = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000';
+  }
+  return 'https://manshu-portfolio-frhd.vercel.app';
+};
+
+const BASE_URL = getBaseUrl();
+
 const LandingPage = () => {
   const [featuredCourses, setFeaturedCourses] = useState([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('https://manshu-portfolio-frhd.vercel.app/api/courses');
+        const response = await fetch(`${BASE_URL}/api/courses`);
         const data = await response.json();
         // Just take public ones
         const publicCourses = data.filter(c => c.isPublic).slice(0, 3);
