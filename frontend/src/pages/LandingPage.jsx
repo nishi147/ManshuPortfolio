@@ -111,6 +111,7 @@ const LandingPage = () => {
                     ) : (
                       <div className="placeholder-img">No Image</div>
                     )}
+                    <div className="course-tag">{course.category || 'Course'}</div>
                   </div>
                   <div className="portfolio-title">
                     {course.title}
